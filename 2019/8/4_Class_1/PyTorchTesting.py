@@ -1,1 +1,1 @@
-print("Hello")
+x = 100
