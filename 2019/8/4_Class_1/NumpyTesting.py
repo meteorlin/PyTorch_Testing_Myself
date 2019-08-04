@@ -56,7 +56,7 @@ for it in range(500):
         # 也就是说，在计算ReLU的梯度时，[0,∞)部分导数是线性的
         # 而在 h<0 部分h的导数是0
     grad_h_relu = grad_y_pred.dot(w2.T)
-    grad_h = grad_h_relu.copy() # 备份一份grad_h_relu
+    grad_h = grad_h_relu.copy() # 备份一份grad_h_relu.
     grad_h[h<0] = 0
     grad_w1 = x.T.dot(grad_h)
 
