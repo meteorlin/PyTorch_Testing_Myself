@@ -23,16 +23,26 @@ model = torch.nn.Sequential(
     torch.nn.Linear(H, D_out),
 )
 
+'''
+    定义一个优化函数，使得pytorch根据我们选择的方法，自动协助我们对参数进行update
+'''
+# 对于任何一个优化器，都需要把模型的参数（model.parameters()）和学习率（learning_rate）传递给它
+
 # 可以使用normal_对model里面的连接权重和正态分布进行拟合，使得网络的参数分布符合正态分布，这样训练时可能会较快收敛
 # 根据上面的model的定义，第一、三层是线性神经元层，第二层是激活函数ReLU()，所以应该对第一、三层的参数进行正则化。
-torch.nn.init.normal_(model[0].weight)
-torch.nn.init.normal_(model[2].weight)
-
 # 定义学习率（learning_rate）
-learning_rate = 1e-6
+# learning_rate = 1e-6
+# torch.nn.init.normal_(model[0].weight)
+# torch.nn.init.normal_(model[2].weight)
+# optimizer = torch.optim.SGD(model.parameters(), lr = learning_rate)
 
-# 可以直接在进入神经网络训练之前定义好loss公式
-loss_fn = nn.MSEloss(reduction='sum') #（均方误差L2），下面的loss也需要同步修改
+# 针对Adam优化方法而言，1e-3到1e-4是比较好的学习率
+# 对于Adam而言，可能不使用torch.nn.init.normal_训练效果会好一点，而SGD就需要进行normal_
+learning_rate = 1e-4
+optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
+
+# 可以直接在进入神经网络训练之前定义好loss公式   均方误差L2 (MSELoss)
+loss_fn = nn.MSEloss(reduction='sum')
 
 # 神经网络训练
 for it in range(500):
@@ -49,16 +59,10 @@ for it in range(500):
     # 反向传播（也就是计算梯度下降的过程）
     # clear the memory of gradient
     # 在计算梯度之前需要把前面累积的清零
-    model.zero_grad()
+    optimizer.zero_grad()
     # compute the gradient
     # 使用backward()自动计算loss中相关参数的梯度
     loss.backward()
 
-    # update weight of w1 and w2
-    # 这里可以直接调用pytorch的自动计算梯度（前提是在前面我们已经对w1 和w2 声明了requires_grad = True）
-    # 需要注意的是，在pytorch中，所有Tensor的计算都是一张计算图（computation graph）
-    # 会占用一定的内存，所以在更新下面的w1 w2 参数时，需要声明不再申请空间来存储w1 w2 的 grad
-    with torch.no_grad():
-        # 模型的所有参数都储存在param中，要进行参数更新时就直接批量更新，不用单独更新
-        for param in model.parameters():
-            param -= learning_rate * param.grad
+    # update model parameters
+    optimizer.step()
