@@ -17,16 +17,21 @@ y = torch.randn(N, D_out)
 # w1 = torch.randn(D_in, H, requires_grad=True)
 # w2 = torch.randn(H, D_out, requires_grad=True)
 
-# 对于后面需要定义的一些复杂模型，我们可以通过继承torch.nn.Module来进行模型扩展
-class TwoLayerNet(torch.nn.Module):
+'''
+    # 对于后面需要定义的一些复杂模型，我们可以通过继承torch.nn.Module来进行模型扩展
     # 在pytorch中只要定义了__init__和forward这两个函数之后就相当于创建了一个网络
+'''
+class TwoLayerNet(torch.nn.Module):
+    # __init__函数中定义了整个网络的框架，所有需要计算导数的层都放在这个函数中
     def __init__(self, D_in, H, D_out):
         # 使用super的方法进行初始化
         super(TwoLayerNet, self).__init__()
         # 定义两个神经元层
+        # define the model architecture
         self.linear1 = torch.nn.Linear(D_in, H)
         self.linear2 = torch.nn.Linear(H, D_out)
 
+    # 前向传播的过程
     def forward(self, x):
         y_pred = self.linear2(self.linear1(x).clamp(min=0))
         return y_pred
